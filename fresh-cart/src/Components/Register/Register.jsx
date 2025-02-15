@@ -1,11 +1,32 @@
-import React from 'react'
+import {React,useState} from 'react'
 import classes from './Register.module.css'
+import * as yup from 'yup'
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 import { Button,FloatingLabel,Alert } from "flowbite-react";
 import { useFormik } from 'formik'
 import { HiInformationCircle } from "react-icons/hi";
 
 export default function Register() {
+
+const navigate=useNavigate();
+const [error,setError]=useState(null);
+const [isLoading,setIsLoading]=useState(false);
+
+
+
+
+
+
+
+
+
+
+
+
+
   const initialValues = {
     name: '',
     email: '',
@@ -14,8 +35,25 @@ export default function Register() {
     phone: '',
   }
 
-  function onSubmit(values){
+  async function onSubmit(values){
     console.log("submit",values)
+    setIsLoading(true);
+    try{
+      //call api
+       const response=await axios.post("https://ecommerce.routemisr.com/api/v1/auth/signup",values);
+       console.log("response",response);
+      if (response.data.message === "success") {
+        console.log("success")
+        navigate("/login")
+        setError(null)
+      }
+    }catch(error){
+      console.log("error",error.response.data.message)
+      setError(error.response.data.message)
+    }finally{
+      setIsLoading(false);
+    }
+   
   }
 
   function validate(values){
@@ -51,16 +89,24 @@ export default function Register() {
     }else if(values.phone.length<11){
       errors.phone = "Phone must be at least 11 characters"
     }
-    return errors;
+  return errors;
   }
 
+const validationSchema=yup.object().shape({
+  name:yup.string().min(3).max(15).required("Name is required"),
+  email:yup.string().email("Invalid email address").required("Email is required"),
+  password:yup.string().min(8).required("Password is required"),
+  rePassword:yup.string().oneOf([yup.ref("password")],"passwords must match").required("Repassword is required"),
+  phone:yup.string().min(11).required("Phone is required")
+})
   const formik = useFormik({
     initialValues,
     onSubmit,
-    validate,
-}
+    //validate,
+    validationSchema,
+})
 
-)
+
   return (
 
       <section className={classes.Register}>
@@ -68,6 +114,8 @@ export default function Register() {
             <div className='max-w-xl mx-auto'>
             <h2 className='text-2xl font-bold  mb-6'>Register</h2>
             <form onSubmit={formik.handleSubmit}>
+
+              {error && <Alert color="failure" icon={HiInformationCircle}>{error}</Alert>}
             
               {formik.errors.name &&formik.touched.name &&
             <Alert color="failure" icon={HiInformationCircle}>
@@ -129,7 +177,12 @@ export default function Register() {
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
             />
-          <Button type='submit' >Register</Button>
+
+          <Button  disabled={!(formik.isValid && formik.dirty||isLoading)} type='submit' >
+            {isLoading ?(
+            <i className='fa fa-spinner fa-spin'></i>)
+            :("Register")
+            }</Button>
             </form>
             </div>
 
