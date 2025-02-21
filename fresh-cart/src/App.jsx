@@ -16,6 +16,8 @@ import Register from './Components/Register/Register'
 import Error from './Components/Error/Error'
 import NotFound from './Components/NotFound/NotFound'
 import { Button } from "flowbite-react";
+import AuthContextProvider  from './Context/AuthContext';
+import ProtectedRoutes from './Components/ProtectedRoutes';
 const router = createBrowserRouter([
   {
     path: "",
@@ -24,23 +26,33 @@ const router = createBrowserRouter([
     children: [
       {
         path: "true",
-        element: <Home />
+        element: <ProtectedRoutes>
+        <Home />
+        </ProtectedRoutes>
       },
       {
         path: "products",
-        element: <Products />
+        element: <ProtectedRoutes>
+        <Products />
+        </ProtectedRoutes>
       },
       {
         path: "cart",
-        element: <Cart />
+        element: <ProtectedRoutes>
+        <Cart />
+        </ProtectedRoutes>
       },
       {
         path: "Brands",
-        element: <Brands />
+        element: <ProtectedRoutes>
+        <Brands />
+        </ProtectedRoutes>
       },
       {
         path: "Categories",
-        element: <Categories />
+        element: <ProtectedRoutes>
+        <Categories />
+        </ProtectedRoutes>
       },
       {
         path: "Login",
@@ -68,7 +80,10 @@ const router = createBrowserRouter([
 function App() {
   return (
     <div>
-      <RouterProvider router={router} />
+
+      <AuthContextProvider>
+        <RouterProvider router={router} />
+      </AuthContextProvider>
       
     </div>
   )
